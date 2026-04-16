@@ -22,70 +22,26 @@ const SAT_CAP = 1580;
 const STRONG_GAIN = 70;
 const CONSERVATIVE_GAIN = 35;
 
-const AVATAR_OPTIONS = [
-  // Marvel
-  { id: 0, name: 'Iron Man', universe: 'Marvel', emoji: '⚡', color: '#d32f2f', bgColor: '#ffebee', icon: 'I' },
-  { id: 1, name: 'Captain America', universe: 'Marvel', emoji: '🛡️', color: '#1976d2', bgColor: '#e3f2fd', icon: 'C' },
-  { id: 2, name: 'Thor', universe: 'Marvel', emoji: '🔨', color: '#ffa000', bgColor: '#fff8e1', icon: 'T' },
-  { id: 3, name: 'Hulk', universe: 'Marvel', emoji: '💪', color: '#388e3c', bgColor: '#e8f5e8', icon: 'H' },
-  { id: 4, name: 'Black Widow', universe: 'Marvel', emoji: '🕷️', color: '#212121', bgColor: '#f5f5f5', icon: 'W' },
-  { id: 5, name: 'Spider-Man', universe: 'Marvel', emoji: '🕷️', color: '#d32f2f', bgColor: '#ffebee', icon: 'S' },
-  { id: 6, name: 'Doctor Strange', universe: 'Marvel', emoji: '🔮', color: '#7b1fa2', bgColor: '#f3e5f5', icon: 'D' },
-  { id: 7, name: 'Black Panther', universe: 'Marvel', emoji: '🐆', color: '#212121', bgColor: '#f5f5f5', icon: 'P' },
-  { id: 8, name: 'Scarlet Witch', universe: 'Marvel', emoji: '🌀', color: '#c41c3b', bgColor: '#fce4ec', icon: 'W' },
-  { id: 9, name: 'Loki', universe: 'Marvel', emoji: '👑', color: '#2196f3', bgColor: '#e1f5fe', icon: 'L' },
-  
-  // DC
-  { id: 10, name: 'Batman', universe: 'DC', emoji: '🦇', color: '#000000', bgColor: '#f5f5f5', icon: 'B' },
-  { id: 11, name: 'Superman', universe: 'DC', emoji: '🔴', color: '#002b7f', bgColor: '#e3f2fd', icon: 'S' },
-  { id: 12, name: 'Wonder Woman', universe: 'DC', emoji: '👸', color: '#c41e3a', bgColor: '#fce4ec', icon: 'W' },
-  { id: 13, name: 'Flash', universe: 'DC', emoji: '⚡', color: '#d32f2f', bgColor: '#ffebee', icon: 'F' },
-  { id: 14, name: 'Aquaman', universe: 'DC', emoji: '🌊', color: '#006cb4', bgColor: '#e1f5fe', icon: 'A' },
-  { id: 15, name: 'Cyborg', universe: 'DC', emoji: '🤖', color: '#c0c0c0', bgColor: '#fafafa', icon: 'C' },
-  { id: 16, name: 'Green Lantern', universe: 'DC', emoji: '💍', color: '#228b22', bgColor: '#e8f5e8', icon: 'G' },
-  { id: 17, name: 'Joker', universe: 'DC', emoji: '🤡', color: '#9c27b0', bgColor: '#f3e5f5', icon: 'J' },
-  { id: 18, name: 'Harley Quinn', universe: 'DC', emoji: '🎪', color: '#e91e63', bgColor: '#fce4ec', icon: 'H' },
-  { id: 19, name: 'Lex Luthor', universe: 'DC', emoji: '🧠', color: '#ffc107', bgColor: '#fff8e1', icon: 'L' },
-  { id: 20, name: 'Darkseid', universe: 'DC', emoji: '👹', color: '#212121', bgColor: '#f5f5f5', icon: 'D' },
-  { id: 21, name: 'Nightwing', universe: 'DC', emoji: '🌙', color: '#1a1a1a', bgColor: '#f5f5f5', icon: 'N' },
-  { id: 22, name: 'Robin', universe: 'DC', emoji: '🦅', color: '#ff6600', bgColor: '#fff3e0', icon: 'R' },
-  { id: 23, name: 'Shazam', universe: 'DC', emoji: '⚡', color: '#ffd600', bgColor: '#fffde7', icon: 'S' },
-  { id: 24, name: 'Green Arrow', universe: 'DC', emoji: '🏹', color: '#228b22', bgColor: '#e8f5e8', icon: 'G' },
-  
-  // The Boys
-  { id: 25, name: 'Homelander', universe: 'The Boys', emoji: '🦸', color: '#0066cc', bgColor: '#e1f5fe', icon: 'H' },
-  { id: 26, name: 'Billy Butcher', universe: 'The Boys', emoji: '🔨', color: '#333333', bgColor: '#f5f5f5', icon: 'B' },
-  { id: 27, name: 'Hughie Campbell', universe: 'The Boys', emoji: '😤', color: '#0066cc', bgColor: '#e1f5fe', icon: 'H' },
-  { id: 28, name: 'Starlight', universe: 'The Boys', emoji: '⭐', color: '#ffcc00', bgColor: '#fff8e1', icon: 'S' },
-  { id: 29, name: 'Queen Maeve', universe: 'The Boys', emoji: '♦️', color: '#9966cc', bgColor: '#f3e5f5', icon: 'M' },
-  { id: 30, name: 'A-Train', universe: 'The Boys', emoji: '🚂', color: '#cc0000', bgColor: '#ffebee', icon: 'A' },
-  { id: 31, name: 'The Deep', universe: 'The Boys', emoji: '🐠', color: '#0099ff', bgColor: '#e1f5fe', icon: 'D' },
-  { id: 32, name: 'Black Noir', universe: 'The Boys', emoji: '🖤', color: '#000000', bgColor: '#f5f5f5', icon: 'N' },
-  { id: 33, name: 'Soldier Boy', universe: 'The Boys', emoji: '🪖', color: '#8b4513', bgColor: '#efebe9', icon: 'S' },
-  { id: 34, name: 'Kimiko', universe: 'The Boys', emoji: '⚔️', color: '#dc143c', bgColor: '#ffebee', icon: 'K' },
-  { id: 35, name: 'Frenchie', universe: 'The Boys', emoji: '🇫🇷', color: '#1e90ff', bgColor: '#e1f5fe', icon: 'F' },
-  { id: 36, name: 'Mother\'s Milk', universe: 'The Boys', emoji: '💪', color: '#2f4f4f', bgColor: '#f5f5f5', icon: 'M' },
-  { id: 37, name: 'Victoria Neuman', universe: 'The Boys', emoji: '🧠', color: '#8b0000', bgColor: '#ffebee', icon: 'V' },
-  { id: 38, name: 'Stan Edgar', universe: 'The Boys', emoji: '💼', color: '#000000', bgColor: '#f5f5f5', icon: 'E' },
-  { id: 39, name: 'Ashley Barrett', universe: 'The Boys', emoji: '📱', color: '#ff1493', bgColor: '#fce4ec', icon: 'A' },
-  
-  // Invincible
-  { id: 40, name: 'Invincible', universe: 'Invincible', emoji: '🦸', color: '#ff0000', bgColor: '#ffebee', icon: 'I' },
-  { id: 41, name: 'Omni-Man', universe: 'Invincible', emoji: '👨', color: '#ffcc00', bgColor: '#fff8e1', icon: 'O' },
-  { id: 42, name: 'Atom Eve', universe: 'Invincible', emoji: '🧪', color: '#ff69b4', bgColor: '#fce4ec', icon: 'A' },
-  { id: 43, name: 'Allen the Alien', universe: 'Invincible', emoji: '👽', color: '#00ff00', bgColor: '#e8f5e8', icon: 'A' },
-  { id: 44, name: 'Robot', universe: 'Invincible', emoji: '🤖', color: '#696969', bgColor: '#f5f5f5', icon: 'R' },
-  { id: 45, name: 'Rex Splode', universe: 'Invincible', emoji: '💥', color: '#ff4500', bgColor: '#ffebee', icon: 'R' },
-  { id: 46, name: 'Dupli-Kate', universe: 'Invincible', emoji: '👯', color: '#9370db', bgColor: '#f3e5f5', icon: 'D' },
-  { id: 47, name: 'Cecil Stedman', universe: 'Invincible', emoji: '🕵️', color: '#1c1c1c', bgColor: '#f5f5f5', icon: 'C' },
-  { id: 48, name: 'The Immortal', universe: 'Invincible', emoji: '♾️', color: '#8b4513', bgColor: '#efebe9', icon: 'I' },
-  { id: 49, name: 'Monster Girl', universe: 'Invincible', emoji: '🦖', color: '#ff6347', bgColor: '#ffebee', icon: 'M' },
-  { id: 50, name: 'Battle Beast', universe: 'Invincible', emoji: '🦁', color: '#a0522d', bgColor: '#efebe9', icon: 'B' },
-  { id: 51, name: 'Angstrom Levy', universe: 'Invincible', emoji: '🌪️', color: '#2f4f4f', bgColor: '#f5f5f5', icon: 'A' },
-  { id: 52, name: 'Thragg', universe: 'Invincible', emoji: '👹', color: '#8b0000', bgColor: '#ffebee', icon: 'T' },
-  { id: 53, name: 'Conquest', universe: 'Invincible', emoji: '⚔️', color: '#2f4f4f', bgColor: '#f5f5f5', icon: 'C' },
-  { id: 54, name: 'Debbie Grayson', universe: 'Invincible', emoji: '👩', color: '#daa520', bgColor: '#fff8e1', icon: 'D' }
+// Simple emoji pool for user avatars - assigned randomly on account creation, permanent and unchangeable
+const AVATAR_EMOJIS = [
+  '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
+  '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😚', '😙',
+  '🥲', '😋', '😛', '😜', '🤪', '😝', '😑', '😐', '😶', '🙁',
+  '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴',
+  '😷', '🤒', '🤕', '🤮', '🤢', '🤮', '🤮', '🤮', '😵', '🤯',
+  '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '☹️', '😮',
+  '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢',
+  '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤',
+  '😡', '😠', '🤬', '😈', '👿', '💀', '🐶', '🐱', '🐭', '🐹',
+  '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸',
+  '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🦆',
+  '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋',
+  '🌟', '⭐', '✨', '💫', '🔥', '💥', '⚡', '🌈', '☀️', '🌙'
 ];
+
+function getRandomEmoji(): string {
+  return AVATAR_EMOJIS[Math.floor(Math.random() * AVATAR_EMOJIS.length)];
+}
 
 const testCentersBase: Omit<TestCenter, 'label'>[] = [
   {
@@ -138,7 +94,7 @@ type DuelCourseRow = {
 
 type ServerPlayer = {
   username: string;
-  avatarId: number;
+  avatarEmoji: string;
   ready: boolean;
   submitted: boolean;
   lineup: DuelCourseRow[];
@@ -271,7 +227,7 @@ function App() {
   const [storedProfile, setStoredProfile] = usePersistentState<UserProfile | null>('gradepilot-profile', null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
-  const [currentAvatarId, setCurrentAvatarId] = useState<number>(() => Math.floor(Math.random() * AVATAR_OPTIONS.length));
+  const [currentAvatarEmoji, setCurrentAvatarEmoji] = useState<string>(() => getRandomEmoji());
   const [section, setSection] = useState<Section>('home');
   const [ibStep, setIbStep] = useState<'select' | 'dashboard'>('select');
   const [selectedCourses, setSelectedCourses] = usePersistentState<IBCourseSelection[]>('gradepilot-ib-courses', []);
@@ -293,8 +249,13 @@ function App() {
   const [playerSat, setPlayerSat] = usePersistentState<number | null>('gradepilot-dual-player-sat', null);
   const [playerAct, setPlayerAct] = usePersistentState<number | null>('gradepilot-dual-player-act', null);
   const [dualSummary, setDualSummary] = useState<DuelSummary | null>(null);
-  const [userPresence, setUserPresence] = useState<Record<string, { status: 'online' | 'active' | 'away' | 'offline', lastSeen: number }>>({});
-  const [friends, setFriends] = useState<Friend[]>([]);
+  const [userPresence, setUserPresence] = usePersistentState<Record<string, { status: 'online' | 'active' | 'away' | 'offline', lastSeen: number }>>('gradepilot-presence', {});
+  const [friends, setFriends] = usePersistentState<Friend[]>('gradepilot-friends', []);
+  const [friendRequests, setFriendRequests] = usePersistentState<{ from: string, to: string, status: 'pending' | 'accepted' | 'declined' }[]>('gradepilot-friend-requests', []);
+  const [privateRooms, setPrivateRooms] = usePersistentState<Record<string, { id: number, code: string, players: ServerPlayer[], phase: ServerPhase }>>('gradepilot-private-rooms', {});
+  const [lastRefresh, setLastRefresh] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [clientSessionId, setClientSessionId] = useState<string>('');
   const [activeSessions, setActiveSessions] = useState<Record<string, SessionData>>({});
@@ -319,6 +280,10 @@ function App() {
   const [dualSearchQuery, setDualSearchQuery] = useState('');
   const [dualSelectedIds, setDualSelectedIds] = useState<Set<string>>(new Set());
   const [showIbImport, setShowIbImport] = useState(false);
+  const [friendSearchQuery, setFriendSearchQuery] = useState('');
+  const [friendSearchError, setFriendSearchError] = useState<string | null>(null);
+  const [roomCodeInput, setRoomCodeInput] = useState('');
+  const [roomCodeError, setRoomCodeError] = useState<string | null>(null);
   const dualCourseOptions = useMemo(() => ibCourseOptions.filter((option) => option.id !== 'tok'), []);
 
   const existingUsernames = useMemo(
@@ -331,6 +296,135 @@ function App() {
     if (!yearNum || !firstName || !lastName) return '';
     return uniqueUsername(generateUsernameFromProfile(yearNum, firstName, lastName), existingUsernames);
   }, [gradYear, firstName, lastName, existingUsernames]);
+
+  // Define functions
+  function renderAvatar(emoji: string, size: 'small' | 'medium' | 'large' = 'small') {
+    const sizeMap = {
+      small: '1.2rem',
+      medium: '1.5rem',
+      large: '2rem'
+    };
+    
+    return (
+      <span style={{ fontSize: sizeMap[size], lineHeight: 1 }}>
+        {emoji}
+      </span>
+    );
+  }
+
+  function getPresenceStatus(username: string) {
+    const presence = userPresence[username];
+    if (!presence) return { status: 'offline' as const, label: 'Offline' };
+    
+    const now = Date.now();
+    const timeSinceSeen = now - presence.lastSeen;
+    
+    if (timeSinceSeen < 30 * 1000) return { status: 'online' as const, label: 'Online' };
+    if (timeSinceSeen < 5 * 60 * 1000) return { status: 'active' as const, label: 'Active just now' };
+    if (timeSinceSeen < 30 * 60 * 1000) return { status: 'away' as const, label: `Active ${Math.floor(timeSinceSeen / (60 * 1000))}m ago` };
+    return { status: 'offline' as const, label: 'Offline' };
+  }
+
+  function refreshServers() {
+    setRefreshing(true);
+    setRefreshError(null);
+    // Simulate fetch delay
+    setTimeout(() => {
+      // In a real app, this would fetch from backend
+      // For now, just update timestamp and force re-render
+      setLastRefresh(Date.now());
+      setServerRefreshKey(prev => prev + 1);
+      setRefreshing(false);
+      console.log('Servers refreshed at', new Date().toISOString());
+    }, 500);
+  }
+
+  function sendFriendRequest(targetUsername: string) {
+    setFriendSearchError(null);
+    if (!targetUsername.trim()) return;
+    if (targetUsername === username) {
+      setFriendSearchError('Cannot send friend request to yourself');
+      return;
+    }
+    if (friends.some(f => f.username === targetUsername)) {
+      setFriendSearchError('Already friends');
+      return;
+    }
+    if (friendRequests.some(r => r.from === username && r.to === targetUsername)) {
+      setFriendSearchError('Friend request already sent');
+      return;
+    }
+    // Check if user exists (simulate)
+    const existingUsernames = [username, ...friends.map(f => f.username), ...Object.keys(userPresence)]; // TODO: better check
+    if (!existingUsernames.includes(targetUsername)) {
+      setFriendSearchError('Username does not exist');
+      return;
+    }
+    setFriendRequests(prev => [...prev, { from: username, to: targetUsername, status: 'pending' }]);
+    setFriendSearchQuery('');
+    console.log('Friend request sent to', targetUsername);
+  }
+
+  function acceptFriendRequest(fromUsername: string) {
+    setFriendRequests(prev => prev.map(r => r.from === fromUsername && r.to === username ? { ...r, status: 'accepted' } : r));
+    // Add to friends
+    const friendPresence = userPresence[fromUsername];
+    if (friendPresence) {
+      setFriends(prev => [...prev, { username: fromUsername, avatarEmoji: userPresence[fromUsername]?.status ? '🙂' : '⭐', status: friendPresence.status, location: 'Menu' }]); // TODO: get emoji from user
+    }
+    console.log('Friend request accepted from', fromUsername);
+  }
+
+  function declineFriendRequest(fromUsername: string) {
+    setFriendRequests(prev => prev.filter(r => !(r.from === fromUsername && r.to === username)));
+    console.log('Friend request declined from', fromUsername);
+  }
+
+  function createPrivateRoom() {
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const roomId = Date.now(); // unique id
+    setPrivateRooms(prev => ({
+      ...prev,
+      [code]: { id: roomId, code, players: [], phase: 'open' }
+    }));
+    // Auto join
+    joinPrivateRoom(code);
+    console.log('Private room created with code', code);
+  }
+
+  function joinPrivateRoom(code: string) {
+    setRoomCodeError(null);
+    const room = privateRooms[code];
+    if (!room) {
+      setRoomCodeError('Invalid room code');
+      return;
+    }
+    if (room.players.length >= 2) {
+      setRoomCodeError('Room is full');
+      return;
+    }
+    if (room.players.some(p => p.username === username)) {
+      setRoomCodeError('Already in this room');
+      return;
+    }
+    // Join
+    setPrivateRooms(prev => ({
+      ...prev,
+      [code]: { ...room, players: [...room.players, { username, avatarEmoji: currentAvatarEmoji, ready: false, submitted: false, lineup: [], satScore: null, actScore: null }] }
+    }));
+    setCurrentServerId(room.id);
+    setRoomCodeInput('');
+    console.log('Joined private room', code);
+  }
+
+  useEffect(() => {
+    // Automatic server refresh every 3-5 seconds
+    const interval = setInterval(() => {
+      refreshServers();
+    }, 4000); // 4 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!editedUsername || editedUsername === usernameSuggestion) {
@@ -381,52 +475,7 @@ function App() {
     return () => clearInterval(interval);
   }, [lastActivity, username]);
 
-  useEffect(() => {
-    // Automatic server refresh every 3-5 seconds
-    const interval = setInterval(() => {
-      refreshServers();
-    }, 4000); // 4 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
   const selectedIds = useMemo(() => new Set(selectedCourses.map((item) => item.id)), [selectedCourses]);
-
-  function renderAvatar(avatarId: number, size: 'small' | 'medium' | 'large' = 'small') {
-    const avatar = AVATAR_OPTIONS[avatarId];
-    if (!avatar) return <span>👤</span>;
-    
-    const sizeMap = {
-      small: '1.2rem',
-      medium: '1.5rem', 
-      large: '2rem'
-    };
-    
-    return (
-      <div 
-        style={{ 
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: sizeMap[size],
-          height: sizeMap[size],
-          borderRadius: '50%',
-          backgroundColor: avatar.bgColor,
-          color: avatar.color,
-          fontSize: size === 'small' ? '0.7rem' : size === 'medium' ? '0.8rem' : '1rem',
-          fontWeight: 'bold',
-          border: '1px solid rgba(0,0,0,0.1)'
-        }}
-        title={avatar.name}
-      >
-        {avatar.icon}
-      </div>
-    );
-  }
-
-  function chooseAvatar(id: number) {
-    setCurrentAvatarId(id);
-  }
 
   const dualFilteredCourses = useMemo(() => {
     if (!dualSearchQuery.trim()) return dualCourseOptions;
@@ -481,23 +530,8 @@ function App() {
     setShowIbImport(false);
   }
 
-  function getPresenceStatus(username: string) {
-    const presence = userPresence[username];
-    if (!presence) return { status: 'offline' as const, label: 'Offline' };
-    
-    const now = Date.now();
-    const timeSinceSeen = now - presence.lastSeen;
-    
-    if (timeSinceSeen < 30 * 1000) return { status: 'online' as const, label: 'Online' };
-    if (timeSinceSeen < 5 * 60 * 1000) return { status: 'active' as const, label: 'Active just now' };
-    if (timeSinceSeen < 30 * 60 * 1000) return { status: 'away' as const, label: `Active ${Math.floor(timeSinceSeen / (60 * 1000))}m ago` };
-    return { status: 'offline' as const, label: 'Offline' };
-  }
-
-  function refreshServers() {
-    // Simulate refreshing server data by updating the refresh key
-    // This will trigger a re-render and update of server states
-    setServerRefreshKey(prev => prev + 1);
+  function chooseAvatar(emoji: string) {
+    setCurrentAvatarEmoji(emoji);
   }
 
   async function handleCreateAccount() {
@@ -537,12 +571,12 @@ function App() {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       graduationYear: yearNum,
-      avatarId: currentAvatarId,
+      avatarEmoji: currentAvatarEmoji,
       pinHash
     };
     setStoredProfile(profile);
     setUsername(profile.username);
-    setCurrentAvatarId(profile.avatarId);
+    setCurrentAvatarEmoji(profile.avatarEmoji);
     setIsAuthenticated(true);
   }
 
@@ -568,7 +602,7 @@ function App() {
       return;
     }
     setUsername(storedProfile.username);
-    setCurrentAvatarId(storedProfile.avatarId);
+    setCurrentAvatarEmoji(storedProfile.avatarEmoji);
     setIsAuthenticated(true);
   }
 
@@ -579,7 +613,14 @@ function App() {
     setAuthError(null);
   }
 
-  const currentServer = useMemo(() => serverRooms.find((room) => room.id === currentServerId) || null, [serverRooms, currentServerId]);
+  const currentServer = useMemo(() => {
+    const publicServer = serverRooms.find((room) => room.id === currentServerId);
+    if (publicServer) return publicServer;
+    // Check private rooms
+    const privateRoom = Object.values(privateRooms).find(room => room.id === currentServerId);
+    if (privateRoom) return { ...privateRoom, name: `Private Room ${privateRoom.code}` };
+    return null;
+  }, [serverRooms, currentServerId, privateRooms]);
   const currentPlayer = useMemo(() => currentServer?.players.find((player) => player.username === username) || null, [currentServer, username]);
   const otherPlayers = useMemo(() => (currentServer ? currentServer.players.filter((player) => player.username !== username) : []), [currentServer, username]);
   const activeOpponentPlayer = useMemo(() => {
@@ -843,7 +884,7 @@ function App() {
           ...room.players,
           {
             username,
-            avatarId: currentAvatarId,
+            avatarEmoji: currentAvatarEmoji,
             ready: false,
             submitted: false,
             lineup: createEmptyLineup('p'),
@@ -858,13 +899,28 @@ function App() {
 
   function leaveServer() {
     if (!currentServerId) return;
-    setServerRooms((rooms) =>
-      rooms.map((room) =>
-        room.id === currentServerId
-          ? { ...room, players: room.players.filter((player) => player.username !== username) }
-          : room
-      )
-    );
+    // Check if public server
+    const isPublic = serverRooms.some(room => room.id === currentServerId);
+    if (isPublic) {
+      setServerRooms((rooms) =>
+        rooms.map((room) =>
+          room.id === currentServerId
+            ? { ...room, players: room.players.filter((player) => player.username !== username) }
+            : room
+        )
+      );
+    } else {
+      // Private room
+      setPrivateRooms(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(code => {
+          if (updated[code].id === currentServerId) {
+            updated[code].players = updated[code].players.filter(p => p.username !== username);
+          }
+        });
+        return updated;
+      });
+    }
     setCurrentServerId(null);
     setPlayerRows(createEmptyLineup('p'));
     setPlayerSat(null);
@@ -874,17 +930,30 @@ function App() {
 
   function updateMyServerProfile(data: Partial<ServerPlayer>) {
     if (!currentServer) return;
-    setServerRooms((rooms) =>
-      rooms.map((room) => {
-        if (room.id !== currentServerId) return room;
-        return {
-          ...room,
-          players: room.players.map((player) =>
-            player.username === username ? { ...player, ...data } : player
-          )
-        };
-      })
-    );
+    const isPublic = serverRooms.some(room => room.id === currentServerId);
+    if (isPublic) {
+      setServerRooms((rooms) =>
+        rooms.map((room) => {
+          if (room.id !== currentServerId) return room;
+          return {
+            ...room,
+            players: room.players.map((player) =>
+              player.username === username ? { ...player, ...data } : player
+            )
+          };
+        })
+      );
+    } else {
+      setPrivateRooms(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(code => {
+          if (updated[code].id === currentServerId) {
+            updated[code].players = updated[code].players.map(p => p.username === username ? { ...p, ...data } : p);
+          }
+        });
+        return updated;
+      });
+    }
   }
 
   function toggleReady() {
@@ -944,11 +1013,10 @@ function App() {
     setIbStep('select');
   }
 
-  const profileAvatar = AVATAR_OPTIONS[currentAvatarId] ?? AVATAR_OPTIONS[0];
   const centerLabel = `Nearby test centers for ${testZip}`;
 
   if (!isAuthenticated) {
-    const previewAvatar = storedProfile ? AVATAR_OPTIONS[storedProfile.avatarId] : profileAvatar;
+    const previewEmoji = storedProfile ? storedProfile.avatarEmoji : currentAvatarEmoji;
     const authMode = storedProfile ? 'login' : 'onboarding';
 
     return (
@@ -960,8 +1028,7 @@ function App() {
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <div className="pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.35rem' }}>{renderAvatar(previewAvatar.id, 'medium')}</span>
-              <span>{previewAvatar.name}</span>
+              <span style={{ fontSize: '1.35rem' }}>{renderAvatar(previewEmoji, 'medium')}</span>
             </div>
           </div>
         </div>
@@ -976,46 +1043,12 @@ function App() {
             <>
               <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
                 <div style={{ display: 'grid', gap: '0.75rem' }}>
-                  <strong>Avatar</strong>
+                  <strong>Your Avatar</strong>
                   <div className="subject-item" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ fontSize: '2rem' }}>{renderAvatar(previewAvatar.id, 'large')}</span>
-                    <span>{previewAvatar.name}</span>
-                    <button type="button" onClick={() => setCurrentAvatarId((value) => (value + 1) % AVATAR_OPTIONS.length)}>
-                      Randomize
-                    </button>
-                    <button type="button" onClick={() => setShowAvatarPicker((visible) => !visible)}>
-                      Choose avatar
-                    </button>
+                    <span style={{ fontSize: '2rem' }}>{renderAvatar(currentAvatarEmoji, 'large')}</span>
+                    <span className="subtle">Your unique emoji avatar is permanent and will appear on your profile.</span>
                   </div>
                 </div>
-                {showAvatarPicker && (
-                  <div style={{ marginTop: '1rem' }}>
-                    {['Marvel', 'DC', 'The Boys', 'Invincible'].map((universe) => {
-                      const universeAvatars = AVATAR_OPTIONS.filter((a) => a.universe === universe);
-                      return (
-                        <div key={universe} style={{ marginBottom: '2rem' }}>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.7 }}>
-                            {universe}
-                          </div>
-                          <div className="subject-grid" style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
-                            {universeAvatars.map((avatar) => (
-                              <button
-                                key={avatar.id}
-                                type="button"
-                                className={`subject-item ${avatar.id === currentAvatarId ? 'active' : ''}`}
-                                onClick={() => chooseAvatar(avatar.id)}
-                                style={{ fontSize: '1.2rem', padding: '1rem', textAlign: 'center', borderRadius: '0.5rem', border: avatar.id === currentAvatarId ? '2px solid #4ade80' : '1px solid #ddd', background: avatar.id === currentAvatarId ? '#f0fdf4' : '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
-                              >
-                                <div style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>{renderAvatar(avatar.id, 'large')}</div>
-                                <div style={{ fontSize: '0.65rem', fontWeight: '500', lineHeight: 1.2 }}>{avatar.name}</div>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
                 <label>
                   Graduation year
                   <input type="number" min={2020} max={2100} value={gradYear} onChange={(event) => setGradYear(event.target.value)} placeholder="2027" />
@@ -1094,7 +1127,7 @@ function App() {
             <>
               <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
                 <div className="subject-item" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '2rem' }}>{renderAvatar(previewAvatar.id, 'large')}</span>
+                  <span style={{ fontSize: '2rem' }}>{renderAvatar(previewEmoji, 'large')}</span>
                   <div>
                     <div>{storedProfile?.firstName} {storedProfile?.lastName}</div>
                     <div className="subtle">{storedProfile?.username}</div>
@@ -1147,15 +1180,12 @@ function App() {
         <div style={{ display: 'grid', gap: '0.8rem', justifyItems: 'end' }}>
           <div className="pill" style={{ display: 'grid', gap: '0.4rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <span style={{ fontSize: '1.4rem' }}>{renderAvatar(profileAvatar.id, 'medium')}</span>
+              <span style={{ fontSize: '1.4rem' }}>{renderAvatar(currentAvatarEmoji, 'medium')}</span>
               <strong>{username}</strong>
             </div>
             <span className="subtle">Logged in as {storedProfile?.firstName} {storedProfile?.lastName}</span>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <button type="button" onClick={() => setShowAvatarPicker((visible) => !visible)}>
-              Change avatar
-            </button>
             <button type="button" onClick={handleLogout}>Logout</button>
           </div>
           <div className="stats-row" style={{ width: '100%', maxWidth: '420px' }}>
@@ -1165,35 +1195,6 @@ function App() {
           </div>
         </div>
       </div>
-      {showAvatarPicker && (
-        <div className="card" style={{ margin: '1rem 0' }}>
-          <h2>Choose your avatar</h2>
-          {['Marvel', 'DC', 'The Boys', 'Invincible'].map((universe) => {
-            const universeAvatars = AVATAR_OPTIONS.filter((a) => a.universe === universe);
-            return (
-              <div key={universe} style={{ marginBottom: '2rem' }}>
-                <div style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.7 }}>
-                  {universe}
-                </div>
-                <div className="subject-grid" style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '0.75rem' }}>
-                  {universeAvatars.map((avatar) => (
-                    <button
-                      key={avatar.id}
-                      type="button"
-                      className={`subject-item ${avatar.id === currentAvatarId ? 'active' : ''}`}
-                      onClick={() => chooseAvatar(avatar.id)}
-                      style={{ fontSize: '1.2rem', padding: '1rem', textAlign: 'center', borderRadius: '0.5rem', border: avatar.id === currentAvatarId ? '2px solid #4ade80' : '1px solid #ddd', background: avatar.id === currentAvatarId ? '#f0fdf4' : '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
-                    >
-                      <div style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>{renderAvatar(avatar.id, 'large')}</div>
-                      <div style={{ fontSize: '0.65rem', fontWeight: '500', lineHeight: 1.2 }}>{avatar.name}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
 
       <div className="section-nav">
         {(['home', 'ib', 'sat', 'act', 'dual'] as Section[]).map((key) => (
@@ -1766,25 +1767,30 @@ function App() {
             <h2>Online Now</h2>
             <p className="subtle">See who is online and where they are.</p>
             <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
-              {friends.filter(friend => friend.status !== 'offline').map((friend) => (
-                <div key={friend.username} className="subject-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.2rem' }}>{renderAvatar(friend.avatarId, 'small')}</span>
-                    <div>
-                      <span>{friend.username}</span>
-                      <div style={{ fontSize: '0.7rem', opacity: 0.7, color: friend.status === 'online' ? '#4ade80' : friend.status === 'active' ? '#fbbf24' : '#f97316' }}>
-                        {friend.status === 'online' ? 'Online' : friend.status === 'active' ? 'Active' : 'Away'} • {friend.location}
+              {Object.entries(userPresence).filter(([username, presence]) => presence.status !== 'offline').map(([user, presence]) => {
+                const location = currentServerId && user === username ? `In server ${currentServerId}` : 'Menu'; // TODO: better
+                return (
+                  <div key={user} className="subject-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '1.2rem' }}>{renderAvatar('🙂', 'small')}</span>
+                      <div>
+                        <span>{user}</span>
+                        <div style={{ fontSize: '0.7rem', opacity: 0.7, color: presence.status === 'online' ? '#4ade80' : presence.status === 'active' ? '#fbbf24' : '#f97316' }}>
+                          {presence.status === 'online' ? 'Online' : presence.status === 'active' ? 'Active' : 'Away'} • {location}
+                        </div>
                       </div>
                     </div>
+                    {user !== username && (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button type="button" onClick={() => sendFriendRequest(user)} style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}>Add Friend</button>
+                        <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.08)' }}>Join</button>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}>Join</button>
-                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.08)' }}>Invite</button>
-                  </div>
-                </div>
-              ))}
-              {friends.filter(friend => friend.status !== 'offline').length === 0 && (
-                <p className="subtle">No friends online right now. Add friends to see them here.</p>
+                );
+              })}
+              {Object.keys(userPresence).filter(username => userPresence[username].status !== 'offline').length === 0 && (
+                <p className="subtle">No one else is online right now.</p>
               )}
             </div>
           </div>
@@ -1794,29 +1800,57 @@ function App() {
             <div style={{ marginTop: '1rem' }}>
               <input
                 type="text"
+                value={friendSearchQuery}
+                onChange={(e) => setFriendSearchQuery(e.target.value)}
                 placeholder="Search username to add friend"
                 style={{ width: '100%', marginBottom: '0.5rem' }}
               />
-              <button type="button" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>Add Friend</button>
+              <button type="button" onClick={() => sendFriendRequest(friendSearchQuery)} style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>Send Friend Request</button>
+              {friendSearchError && (
+                <div style={{ marginTop: '0.5rem', color: '#ff8b8b', fontSize: '0.8rem' }}>
+                  {friendSearchError}
+                </div>
+              )}
             </div>
-            <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
-              {friends.map((friend) => (
-                <div key={friend.username} className="subject-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.2rem' }}>{renderAvatar(friend.avatarId, 'small')}</span>
-                    <div>
-                      <span>{friend.username}</span>
-                      <div style={{ fontSize: '0.7rem', opacity: 0.7, color: friend.status === 'online' ? '#4ade80' : friend.status === 'active' ? '#fbbf24' : friend.status === 'away' ? '#f97316' : '#6b7280' }}>
-                        {friend.status === 'online' ? 'Online' : friend.status === 'active' ? 'Active' : friend.status === 'away' ? 'Away' : 'Offline'} • {friend.location}
-                      </div>
-                    </div>
-                  </div>
+            <div style={{ marginTop: '1rem' }}>
+              <h4>Friend Requests</h4>
+              {friendRequests.filter(req => req.to === username).map((req) => (
+                <div key={req.from} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '0.25rem', marginBottom: '0.5rem' }}>
+                  <span>{req.from} sent a friend request</span>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}>Join</button>
-                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.08)' }}>Invite</button>
+                    <button onClick={() => acceptFriendRequest(req.from)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>Accept</button>
+                    <button onClick={() => declineFriendRequest(req.from)} style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.08)' }}>Decline</button>
                   </div>
                 </div>
               ))}
+              {friendRequests.filter(req => req.from === username).map((req) => (
+                <div key={req.to} style={{ padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '0.25rem', marginBottom: '0.5rem' }}>
+                  Friend request sent to {req.to} ({req.status})
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
+              {friends.map((friend) => {
+                const presence = userPresence[friend.username] || { status: 'offline', lastSeen: 0 };
+                const location = currentServerId && friend.username === username ? `In server ${currentServerId}` : 'Menu'; // TODO: better
+                return (
+                  <div key={friend.username} className="subject-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '1.2rem' }}>{renderAvatar(friend.avatarEmoji, 'small')}</span>
+                      <div>
+                        <span>{friend.username}</span>
+                        <div style={{ fontSize: '0.7rem', opacity: 0.7, color: presence.status === 'online' ? '#4ade80' : presence.status === 'active' ? '#fbbf24' : presence.status === 'away' ? '#f97316' : '#6b7280' }}>
+                          {presence.status === 'online' ? 'Online' : presence.status === 'active' ? 'Active' : presence.status === 'away' ? 'Away' : 'Offline'} • {location}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}>Join</button>
+                      <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.08)' }}>Invite</button>
+                    </div>
+                  </div>
+                );
+              })}
               {friends.length === 0 && (
                 <p className="subtle">No friends added yet. Search for usernames to add friends.</p>
               )}
@@ -1826,13 +1860,21 @@ function App() {
             <h2>Open servers</h2>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <p className="subtle">Join any of the 10 open DUAL servers and see who is currently waiting.</p>
-              <button
-                type="button"
-                onClick={refreshServers}
-                style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.08)', color: 'var(--text)' }}
-              >
-                Refresh Servers
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                <button
+                  type="button"
+                  onClick={refreshServers}
+                  disabled={refreshing}
+                  style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.08)', color: 'var(--text)' }}
+                >
+                  {refreshing ? 'Refreshing...' : 'Refresh Servers'}
+                </button>
+                {lastRefresh && (
+                  <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>
+                    Last refresh: {new Date(lastRefresh).toLocaleTimeString()}
+                  </span>
+                )}
+              </div>
             </div>
             <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
               {serverRooms.map((room) => (
@@ -1845,7 +1887,7 @@ function App() {
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.45rem' }}>
                           {room.players.map((player) => (
                             <div key={player.username} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                              {renderAvatar(player.avatarId, 'small')}
+                              {renderAvatar(player.avatarEmoji, 'small')}
                               <span>{player.username}</span>
                             </div>
                           ))}
@@ -1868,13 +1910,27 @@ function App() {
               <h4>Join by Room Code</h4>
               <p className="subtle" style={{ fontSize: '0.8rem' }}>Enter a room code to join a private server.</p>
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <input type="text" placeholder="Room code" style={{ flex: 1 }} />
-                <button type="button" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>Join</button>
+                <input
+                  type="text"
+                  value={roomCodeInput}
+                  onChange={(e) => setRoomCodeInput(e.target.value)}
+                  placeholder="Room code"
+                  style={{ flex: 1 }}
+                />
+                <button type="button" onClick={() => joinPrivateRoom(roomCodeInput)} style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>Join</button>
+              </div>
+              {roomCodeError && (
+                <div style={{ marginTop: '0.5rem', color: '#ff8b8b', fontSize: '0.8rem' }}>
+                  {roomCodeError}
+                </div>
+              )}
+              <div style={{ marginTop: '1rem' }}>
+                <button type="button" onClick={createPrivateRoom} style={{ fontSize: '0.9rem', padding: '0.5rem 1rem', background: 'rgba(99,218,141,0.18)' }}>Create Private Room</button>
               </div>
             </div>
-            {serverError && (
-              <div className="info-box" style={{ marginTop: '1rem', color: '#ff8b8b', borderColor: '#ff8b8b' }}>
-                {serverError}
+            {refreshError && (
+              <div className="info-box" style={{ marginTop: '0.5rem', color: '#ff8b8b', borderColor: '#ff8b8b' }}>
+                Refresh failed: {refreshError}
               </div>
             )}
           </div>
@@ -1896,7 +1952,7 @@ function App() {
                       return (
                         <div key={player.username} className="subject-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span style={{ fontSize: '1.2rem' }}>{renderAvatar(player.avatarId, 'small')}</span>
+                            <span style={{ fontSize: '1.2rem' }}>{renderAvatar(player.avatarEmoji, 'small')}</span>
                             <div>
                               <span>{player.username}</span>
                               <div style={{ fontSize: '0.7rem', opacity: 0.7, color: presence.status === 'online' ? '#4ade80' : presence.status === 'active' ? '#fbbf24' : presence.status === 'away' ? '#f97316' : '#6b7280' }}>
@@ -2125,12 +2181,12 @@ function App() {
                     <h3>DUAL results</h3>
                     <div className="stats-row" style={{ marginTop: '1rem' }}>
                       <div className="metric" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>{renderAvatar(profileAvatar.id, 'small')}</span>
+                        <span style={{ fontSize: '1.2rem' }}>{renderAvatar(currentAvatarEmoji, 'small')}</span>
                         <strong>{dualSummary.playerTotal.toFixed(1)}</strong>
                         <span>You</span>
                       </div>
                       <div className="metric" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                        <span style={{ fontSize: '1.2rem' }}>{renderAvatar(activeOpponentPlayer?.avatarId ?? 0, 'small')}</span>
+                        <span style={{ fontSize: '1.2rem' }}>{renderAvatar(activeOpponentPlayer?.avatarEmoji ?? '🙂', 'small')}</span>
                         <strong>{dualSummary.opponentTotal.toFixed(1)}</strong>
                         <span>{activeOpponentPlayer?.username ?? 'Opponent'}</span>
                       </div>
@@ -2172,7 +2228,17 @@ function App() {
       )}
 
       <div className="footer-note">
-        Gradepilot stores your performance locally in the browser. This version uses no passwords or account authentication.
+        <details>
+          <summary>Debug Info</summary>
+          <div style={{ fontSize: '0.8rem', marginTop: '1rem' }}>
+            <p>Session ID: {clientSessionId}</p>
+            <p>Current Server ID: {currentServerId || 'None'}</p>
+            <p>Last Refresh: {lastRefresh ? new Date(lastRefresh).toISOString() : 'Never'}</p>
+            <p>Friend Requests: {friendRequests.length}</p>
+            <p>Private Rooms: {Object.keys(privateRooms).length}</p>
+            <p>Online Users: {Object.keys(userPresence).filter(u => userPresence[u].status !== 'offline').length}</p>
+          </div>
+        </details>
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ export type UserProfile = {
   firstName: string;
   lastName: string;
   graduationYear: number;
-  avatarId: number;
+  avatarEmoji: string;
   pinHash: string;
 };
 
@@ -60,7 +60,7 @@ export type SessionData = {
 
 export type Friend = {
   username: string;
-  avatarId: number;
+  avatarEmoji: string;
   status: 'online' | 'active' | 'away' | 'offline';
   location: string;
 };

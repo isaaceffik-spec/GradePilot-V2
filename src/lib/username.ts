@@ -33,7 +33,8 @@ export function generateUsername() {
 
 export function generateUsernameFromProfile(year: number, firstName: string, lastName: string) {
   const yearSuffix = year.toString().slice(-2);
-  const raw = `${yearSuffix}${firstName}${lastName}`;
+  const firstInitial = firstName.charAt(0);
+  const raw = `${yearSuffix}${firstInitial}${lastName}`;
   return normalizeUsername(raw);
 }
 
