@@ -9,7 +9,7 @@ import {
   unisIBAverage,
   unisTotalAverage
 } from './data/ibData';
-import type { DuelStats, IBCourseSelection, SatActData, TestCenter, UserProfile } from './types';
+import type { DuelStats, IBCourseSelection, SatActData, TestCenter, UserProfile, SessionData } from './types';
 
 const SAT_AVERAGE = 1029;
 const UNIS_SAT = 1370;

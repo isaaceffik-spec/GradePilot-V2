@@ -51,3 +51,9 @@ export type TestCenter = {
   stress: number;
   label: string;
 };
+
+export type SessionData = {
+  userId: string;
+  status: 'online' | 'active' | 'away' | 'offline';
+  lastSeen: number;
+};
