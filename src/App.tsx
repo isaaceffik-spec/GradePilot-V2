@@ -9,7 +9,7 @@ import {
   unisIBAverage,
   unisTotalAverage
 } from './data/ibData';
-import type { DuelStats, IBCourseSelection, SatActData, TestCenter, UserProfile, SessionData } from './types';
+import type { DuelStats, IBCourseSelection, SatActData, TestCenter, UserProfile, SessionData, Friend } from './types';
 
 const SAT_AVERAGE = 1029;
 const UNIS_SAT = 1370;
@@ -294,6 +294,7 @@ function App() {
   const [playerAct, setPlayerAct] = usePersistentState<number | null>('gradepilot-dual-player-act', null);
   const [dualSummary, setDualSummary] = useState<DuelSummary | null>(null);
   const [userPresence, setUserPresence] = useState<Record<string, { status: 'online' | 'active' | 'away' | 'offline', lastSeen: number }>>({});
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [clientSessionId, setClientSessionId] = useState<string>('');
   const [activeSessions, setActiveSessions] = useState<Record<string, SessionData>>({});
@@ -1762,6 +1763,66 @@ function App() {
       {section === 'dual' && (
         <div className="grid-2">
           <div className="card">
+            <h2>Online Now</h2>
+            <p className="subtle">See who is online and where they are.</p>
+            <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
+              {friends.filter(friend => friend.status !== 'offline').map((friend) => (
+                <div key={friend.username} className="subject-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>{renderAvatar(friend.avatarId, 'small')}</span>
+                    <div>
+                      <span>{friend.username}</span>
+                      <div style={{ fontSize: '0.7rem', opacity: 0.7, color: friend.status === 'online' ? '#4ade80' : friend.status === 'active' ? '#fbbf24' : '#f97316' }}>
+                        {friend.status === 'online' ? 'Online' : friend.status === 'active' ? 'Active' : 'Away'} • {friend.location}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}>Join</button>
+                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.08)' }}>Invite</button>
+                  </div>
+                </div>
+              ))}
+              {friends.filter(friend => friend.status !== 'offline').length === 0 && (
+                <p className="subtle">No friends online right now. Add friends to see them here.</p>
+              )}
+            </div>
+          </div>
+          <div className="card">
+            <h2>Friends</h2>
+            <p className="subtle">Manage your friends list.</p>
+            <div style={{ marginTop: '1rem' }}>
+              <input
+                type="text"
+                placeholder="Search username to add friend"
+                style={{ width: '100%', marginBottom: '0.5rem' }}
+              />
+              <button type="button" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>Add Friend</button>
+            </div>
+            <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
+              {friends.map((friend) => (
+                <div key={friend.username} className="subject-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>{renderAvatar(friend.avatarId, 'small')}</span>
+                    <div>
+                      <span>{friend.username}</span>
+                      <div style={{ fontSize: '0.7rem', opacity: 0.7, color: friend.status === 'online' ? '#4ade80' : friend.status === 'active' ? '#fbbf24' : friend.status === 'away' ? '#f97316' : '#6b7280' }}>
+                        {friend.status === 'online' ? 'Online' : friend.status === 'active' ? 'Active' : friend.status === 'away' ? 'Away' : 'Offline'} • {friend.location}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}>Join</button>
+                    <button type="button" style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', background: 'rgba(255,255,255,0.08)' }}>Invite</button>
+                  </div>
+                </div>
+              ))}
+              {friends.length === 0 && (
+                <p className="subtle">No friends added yet. Search for usernames to add friends.</p>
+              )}
+            </div>
+          </div>
+          <div className="card">
             <h2>Open servers</h2>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <p className="subtle">Join any of the 10 open DUAL servers and see who is currently waiting.</p>
@@ -1779,13 +1840,14 @@ function App() {
                   <div>
                     <strong>{room.name}</strong>
                     <div className="subtle" style={{ marginTop: '0.35rem' }}>
-                      {room.players.length}/2 players {room.players.length === 2 ? '(full)' : ''}
+                      {room.players.length}/2 players {room.players.length === 2 ? '(full)' : room.players.length === 0 ? '(empty)' : '(open)'}
                       {room.players.length > 0 && (
-                        <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.45rem' }}>
-                          {room.players.slice(0, 4).map((player) => (
-                            <span key={player.username} style={{ fontSize: '1rem' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.45rem' }}>
+                          {room.players.map((player) => (
+                            <div key={player.username} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
                               {renderAvatar(player.avatarId, 'small')}
-                            </span>
+                              <span>{player.username}</span>
+                            </div>
                           ))}
                         </div>
                       )}
@@ -1801,6 +1863,14 @@ function App() {
                   </button>
                 </div>
               ))}
+            </div>
+            <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '0.5rem' }}>
+              <h4>Join by Room Code</h4>
+              <p className="subtle" style={{ fontSize: '0.8rem' }}>Enter a room code to join a private server.</p>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <input type="text" placeholder="Room code" style={{ flex: 1 }} />
+                <button type="button" style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}>Join</button>
+              </div>
             </div>
             {serverError && (
               <div className="info-box" style={{ marginTop: '1rem', color: '#ff8b8b', borderColor: '#ff8b8b' }}>

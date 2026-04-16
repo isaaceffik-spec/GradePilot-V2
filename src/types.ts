@@ -57,3 +57,10 @@ export type SessionData = {
   status: 'online' | 'active' | 'away' | 'offline';
   lastSeen: number;
 };
+
+export type Friend = {
+  username: string;
+  avatarId: number;
+  status: 'online' | 'active' | 'away' | 'offline';
+  location: string;
+};
