@@ -9,7 +9,7 @@ import {
   unisIBAverage,
   unisTotalAverage
 } from './data/ibData';
-import type { DuelStats, IBCourseSelection, SatActData, TestCenter, UserProfile, SessionData, Friend } from './types';
+import type { DuelStats, IBCourseSelection, SatActData, TestCenter, UserProfile, SessionData, Friend, FriendRequest, FriendProfile, SavedProgress } from './types';
 
 const SAT_AVERAGE = 1029;
 const UNIS_SAT = 1370;
@@ -82,7 +82,7 @@ const categoryGroups: Record<string, string[]> = {
   Arts: ['Group 6']
 };
 
-type Section = 'home' | 'ib' | 'sat' | 'act';
+type Section = 'home' | 'ib' | 'sat' | 'act' | 'profile';
 
 type ServerPhase = 'open' | 'lobby' | 'input' | 'compare' | 'reveal';
 
@@ -377,6 +377,17 @@ function App() {
   const [loginPin, setLoginPin] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [profileEditMode, setProfileEditMode] = useState(false);
+  const [editGradYear, setEditGradYear] = useState('');
+  const [editUsername, setEditUsername] = useState('');
+  const [editPin, setEditPin] = useState('');
+  const [editConfirmPin, setEditConfirmPin] = useState('');
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [friendsList, setFriendsList] = usePersistentState<string[]>('gradepilot-friends', []);
+  const [friendRequests, setFriendRequests] = usePersistentState<FriendRequest[]>('gradepilot-friend-requests', []);
+  const [searchFriendQuery, setSearchFriendQuery] = useState('');
+  const [selectedFriendUsername, setSelectedFriendUsername] = useState<string | null>(null);
+  const [friendProfileCache, setFriendProfileCache] = usePersistentState<Record<string, FriendProfile>>('gradepilot-friend-profiles', {});
 
   const existingUsernames = useMemo(
     () => (storedProfile ? [normalizeUsername(storedProfile.username)] : []),
@@ -414,13 +425,147 @@ function App() {
   useEffect(() => {
     if (storedProfile?.username) {
       setLoginUsername(storedProfile.username);
+      setEditGradYear(String(storedProfile.graduationYear || ''));
+      setEditUsername(storedProfile.username);
     }
   }, [storedProfile]);
 
   const selectedIds = useMemo(() => new Set(selectedCourses.map((item) => item.id)), [selectedCourses]);
 
+  const allUsernames = useMemo(() => {
+    const names = [normalizeUsername(storedProfile?.username || '')];
+    Object.keys(friendProfileCache).forEach((username) => {
+      names.push(normalizeUsername(username));
+    });
+    return names.filter((n) => n.length > 0);
+  }, [storedProfile, friendProfileCache]);
+
   function chooseAvatar(emoji: string) {
     setCurrentAvatarEmoji(emoji);
+  }
+
+  async function handleUpdateProfile() {
+    setProfileError(null);
+    const newGradYear = Number(editGradYear);
+    if (!newGradYear || newGradYear < 2020 || newGradYear > 2100) {
+      setProfileError('Graduation year must be between 2020 and 2100.');
+      return;
+    }
+    const newUsername = normalizeUsername(editUsername);
+    if (!newUsername) {
+      setProfileError('Username cannot be empty.');
+      return;
+    }
+    if (
+      newUsername !== normalizeUsername(storedProfile?.username || '') &&
+      allUsernames.some((u) => u === newUsername)
+    ) {
+      setProfileError('Username already taken.');
+      return;
+    }
+    if (editPin && !isValidPin(editPin)) {
+      setProfileError('PIN must be exactly 4 digits.');
+      return;
+    }
+    if (editPin && editConfirmPin && editPin !== editConfirmPin) {
+      setProfileError('PINs do not match.');
+      return;
+    }
+
+    const updatedProfile: UserProfile = {
+      ...storedProfile!,
+      username: newUsername,
+      graduationYear: newGradYear,
+      pinHash: editPin ? await hashPin(editPin) : storedProfile!.pinHash,
+      friendsList: friendsList,
+      friendRequests: friendRequests,
+      lastUpdated: Date.now()
+    };
+    setStoredProfile(updatedProfile);
+    setUsername(newUsername);
+    setProfileEditMode(false);
+    setEditPin('');
+    setEditConfirmPin('');
+  }
+
+  function getCurrentSavedProgress(): SavedProgress {
+    return {
+      selectedIbCourses: selectedCourses,
+      predictedIbScore: actualIbScore,
+      satActData: satActData,
+      lastUpdated: Date.now()
+    };
+  }
+
+  async function handleSendFriendRequest(targetUsername: string) {
+    if (!storedProfile) return;
+    const normalized = normalizeUsername(targetUsername);
+    if (normalized === normalizeUsername(storedProfile.username)) {
+      setProfileError('Cannot add yourself as friend.');
+      return;
+    }
+    if (friendsList.includes(normalized)) {
+      setProfileError('Already friends with this user.');
+      return;
+    }
+    const pendingRequest = friendRequests.find(
+      (req) => normalizeUsername(req.fromUsername) === normalized && req.status === 'pending'
+    );
+    if (pendingRequest) {
+      setProfileError('Friend request already pending.');
+      return;
+    }
+    const newRequest: FriendRequest = {
+      fromUsername: normalized,
+      fromAvatar: '👤',
+      timestamp: Date.now(),
+      status: 'pending'
+    };
+    setFriendRequests([...friendRequests, newRequest]);
+  }
+
+  function handleAcceptFriendRequest(fromUsername: string) {
+    const normalized = normalizeUsername(fromUsername);
+    setFriendRequests(
+      friendRequests.map((req) =>
+        normalizeUsername(req.fromUsername) === normalized && req.status === 'pending'
+          ? { ...req, status: 'accepted' }
+          : req
+      )
+    );
+    if (!friendsList.includes(normalized)) {
+      setFriendsList([...friendsList, normalized]);
+    }
+  }
+
+  function handleDeclineFriendRequest(fromUsername: string) {
+    const normalized = normalizeUsername(fromUsername);
+    setFriendRequests(
+      friendRequests.map((req) =>
+        normalizeUsername(req.fromUsername) === normalized && req.status === 'pending'
+          ? { ...req, status: 'declined' }
+          : req
+      )
+    );
+  }
+
+  function handleRemoveFriend(friendUsername: string) {
+    const normalized = normalizeUsername(friendUsername);
+    setFriendsList(friendsList.filter((f) => normalizeUsername(f) !== normalized));
+  }
+
+  function buildFriendProfile(username: string): FriendProfile {
+    const cached = friendProfileCache[username];
+    if (cached) return cached;
+    const profile: FriendProfile = {
+      username,
+      avatarEmoji: '👤',
+      graduationYear: 2026,
+      selectedIbCourses: [],
+      predictedIbScore: undefined,
+      satActSummary: undefined
+    };
+    return profile;
   }
 
   async function handleCreateAccount() {
@@ -912,7 +1057,7 @@ function App() {
       </div>
 
       <div className="section-nav">
-        {(['home', 'ib', 'sat', 'act'] as Section[]).map((key) => (
+        {(['home', 'ib', 'sat', 'act', 'profile'] as Section[]).map((key) => (
           <button
             key={key}
             className={section === key ? 'active' : ''}
@@ -944,7 +1089,7 @@ function App() {
             <div className="card">
               <h2>Profile</h2>
               <p className="subtle">Manage your graduation year, username, PIN, and saved progress.</p>
-              <button type="button" onClick={() => setSection('ib')}>Open IB dashboard</button>
+              <button type="button" onClick={() => setSection('profile')}>Manage Profile</button>
             </div>
           </div>
 
@@ -1629,9 +1774,235 @@ function App() {
         </div>
       )}
 
+      {section === 'profile' && isAuthenticated && (
+        <div className="grid-2">
+          {!profileEditMode ? (
+            <>
+              <div className="card">
+                <h2>My Profile</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '2rem' }}>{renderAvatar(storedProfile?.avatarEmoji || '👤', 'large')}</span>
+                  <div>
+                    <div><strong>{storedProfile?.firstName} {storedProfile?.lastName}</strong></div>
+                    <div className="subtle">{storedProfile?.username}</div>
+                  </div>
+                </div>
+                <div className="info-box" style={{ marginBottom: '1rem' }}>
+                  <strong>Graduation Year:</strong> {storedProfile?.graduationYear}
+                </div>
+                <div className="info-box" style={{ marginBottom: '1rem' }}>
+                  <strong>PIN:</strong> ••••
+                </div>
+                <button type="button" onClick={() => setProfileEditMode(true)} style={{ width: '100%' }}>
+                  Edit Profile
+                </button>
+              </div>
+
+              <div className="card">
+                <h2>Saved Progress</h2>
+                <div className="info-box" style={{ marginBottom: '1rem' }}>
+                  <strong>IB Courses:</strong> {selectedCourses.length} selected
+                </div>
+                <div className="info-box" style={{ marginBottom: '1rem' }}>
+                  <strong>Predicted IB Score:</strong> {actualIbScore ?? 'Not calculated'}
+                </div>
+                <div className="info-box" style={{ marginBottom: '1rem' }}>
+                  <strong>SAT Score:</strong> {satActData.sat ?? 'Not entered'}
+                </div>
+                <div className="info-box">
+                  <strong>ACT Score:</strong> {satActData.act ?? 'Not entered'}
+                </div>
+              </div>
+
+              <div className="card" style={{ gridColumn: '1 / -1' }}>
+                <h2>Friends ({friendsList.length})</h2>
+                <div style={{ display: 'grid', gap: '1rem', marginBottom: '1rem' }}>
+                  {friendRequests.filter((req) => req.status === 'pending').length > 0 && (
+                    <div className="info-box" style={{ background: 'rgba(255, 193, 7, 0.1)', borderColor: 'rgba(255, 193, 7, 0.5)' }}>
+                      <strong>Friend Requests ({friendRequests.filter((req) => req.status === 'pending').length})</strong>
+                      <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
+                        {friendRequests.filter((req) => req.status === 'pending').map((req) => (
+                          <div key={req.fromUsername} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'space-between' }}>
+                            <div>
+                              <div>{req.fromUsername}</div>
+                              <div className="subtle" style={{ fontSize: '0.8rem' }}>
+                                {new Date(req.timestamp).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleAcceptFriendRequest(req.fromUsername)}
+                                style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}
+                              >
+                                Accept
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeclineFriendRequest(req.fromUsername)}
+                                style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}
+                              >
+                                Decline
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <input
+                    type="text"
+                    placeholder="Search friends by username..."
+                    value={searchFriendQuery}
+                    onChange={(event) => setSearchFriendQuery(event.target.value)}
+                    style={{ width: '100%' }}
+                  />
+                  {searchFriendQuery && (
+                    <button
+                      type="button"
+                      onClick={() => handleSendFriendRequest(searchFriendQuery)}
+                      style={{ width: '100%' }}
+                    >
+                      Send Friend Request
+                    </button>
+                  )}
+                </div>
+
+                {friendsList.length > 0 && (
+                  <div>
+                    <strong>Friends</strong>
+                    <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
+                      {friendsList.map((friend) => (
+                        <div
+                          key={friend}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.75rem',
+                            background: 'rgba(100, 200, 255, 0.1)',
+                            borderRadius: '0.5rem'
+                          }}
+                        >
+                          <div style={{ cursor: 'pointer' }} onClick={() => setSelectedFriendUsername(friend)}>
+                            {friend}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFriend(friend)}
+                            style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', background: 'rgba(255, 100, 100, 0.2)' }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="card" style={{ gridColumn: '1 / -1' }}>
+              <h2>Edit Profile</h2>
+              <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
+                <label>
+                  Graduation Year
+                  <input
+                    type="number"
+                    min={2020}
+                    max={2100}
+                    value={editGradYear}
+                    onChange={(event) => setEditGradYear(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Username
+                  <input
+                    type="text"
+                    value={editUsername}
+                    onChange={(event) => setEditUsername(normalizeUsername(event.target.value))}
+                    placeholder="username"
+                  />
+                </label>
+                <label>
+                  New PIN (leave blank to keep current)
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={editPin}
+                    onChange={(event) => setEditPin(event.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="1234"
+                  />
+                </label>
+                <label>
+                  Confirm New PIN
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={editConfirmPin}
+                    onChange={(event) => setEditConfirmPin(event.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="1234"
+                  />
+                </label>
+              </div>
+              {profileError && (
+                <div className="info-box" style={{ marginTop: '1rem', color: '#ff8b8b' }}>
+                  {profileError}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                <button type="button" onClick={handleUpdateProfile} style={{ flex: 1 }}>
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileEditMode(false);
+                    setEditPin('');
+                    setEditConfirmPin('');
+                    setProfileError(null);
+                  }}
+                  style={{ flex: 1, background: 'rgba(100, 100, 100, 0.2)' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {selectedFriendUsername && (
+            <div className="card" style={{ gridColumn: '1 / -1' }}>
+              <h2>Friend Profile: {selectedFriendUsername}</h2>
+              <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedFriendUsername(null)}
+                  style={{ alignSelf: 'flex-start', background: 'rgba(100, 100, 100, 0.2)' }}
+                >
+                  Close
+                </button>
+                <div className="info-box">
+                  <strong>Username:</strong> {selectedFriendUsername}
+                </div>
+                <div className="info-box">
+                  <strong>Graduation Year:</strong> 2026
+                </div>
+                <div className="info-box">
+                  <strong>IB Courses:</strong> Not available
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
     </div>
   );
 }
 
 export default App;
+
+

@@ -27,6 +27,32 @@ export type SatActData = {
   activeSatAttemptId: string | null;
 };
 
+export type SavedProgress = {
+  selectedIbCourses: IBCourseSelection[];
+  predictedIbScore: number | null;
+  satActData: SatActData;
+  lastUpdated: number;
+};
+
+export type FriendRequest = {
+  fromUsername: string;
+  fromAvatar: string;
+  timestamp: number;
+  status: 'pending' | 'accepted' | 'declined';
+};
+
+export type FriendProfile = {
+  username: string;
+  avatarEmoji: string;
+  graduationYear: number;
+  selectedIbCourses?: IBCourseSelection[];
+  predictedIbScore?: number;
+  satActSummary?: {
+    satScore: number | null;
+    actScore: number | null;
+  };
+};
+
 export type UserProfile = {
   username: string;
   firstName: string;
@@ -34,6 +60,10 @@ export type UserProfile = {
   graduationYear: number;
   avatarEmoji: string;
   pinHash: string;
+  friendsList?: string[];
+  friendRequests?: FriendRequest[];
+  savedProgress?: SavedProgress;
+  lastUpdated?: number;
 };
 
 export type DuelStats = {
