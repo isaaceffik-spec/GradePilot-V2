@@ -165,23 +165,31 @@ function mapIBToUS(average: number) {
   return 0.0;
 }
 
+function satEquivalentFromPsat(score: number) {
+  return Math.min(1600, Math.max(400, Math.round(score * 0.95 + 35)));
+}
+
+function refineSatPredictionWithPsat(prediction: { conservative: number; best: number }, satScore: number, psatScore: number) {
+  const psatEquivalent = satEquivalentFromPsat(psatScore);
+  const adjustment = Math.round((psatEquivalent - satScore) * 0.15);
+  return {
+    conservative: Math.min(1600, Math.max(satScore, prediction.conservative + adjustment)),
+    best: Math.min(1600, Math.max(satScore, prediction.best + adjustment))
+  };
+}
+
 function computePrediction(score: number | null, type: 'sat' | 'act' | 'psat') {
   if (score === null) return { conservative: 0, best: 0 };
-  if (type === 'sat') {
+  const baseline = type === 'psat' ? satEquivalentFromPsat(score) : score;
+  if (type === 'sat' || type === 'psat') {
     return {
-      conservative: Math.min(1600, Math.round(score + 45)),
-      best: Math.min(1600, Math.round(score + 110))
-    };
-  }
-  if (type === 'act') {
-    return {
-      conservative: Math.min(36, Math.round(score + 3)),
-      best: Math.min(36, Math.round(score + 6))
+      conservative: Math.min(1600, Math.round(baseline + 45)),
+      best: Math.min(1600, Math.round(baseline + 110))
     };
   }
   return {
-    conservative: Math.min(1600, Math.round(score * 1.03 + 40)),
-    best: Math.min(1600, Math.round(score * 1.08 + 70))
+    conservative: Math.min(36, Math.round(score + 3)),
+    best: Math.min(36, Math.round(score + 6))
   };
 }
 
@@ -270,13 +278,27 @@ function App() {
   const [lastName, setLastName] = useState('');
   const [usernameSuggestion, setUsernameSuggestion] = useState('');
   const [editedUsername, setEditedUsername] = useState('');
-  const [pinDigits, setPinDigits] = useState(['', '', '', ''] as [string, string, string, string]);
-  const [confirmPinDigits, setConfirmPinDigits] = useState(['', '', '', ''] as [string, string, string, string]);
+  const [pinDigits, setPinDigits] = useState<[string, string, string, string]>(['', '', '', '']);
+  const [confirmPinDigits, setConfirmPinDigits] = useState<[string, string, string, string]>(['', '', '', '']);
+  const [loginPinDigits, setLoginPinDigits] = useState<[string, string, string, string]>(['', '', '', '']);
+  const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
   const [loginUsername, setLoginUsername] = useState('');
-  const [loginPinDigits, setLoginPinDigits] = useState(['', '', '', ''] as [string, string, string, string]);
+  const [loginPin, setLoginPin] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    setPin(pinArrayToString(pinDigits));
+  }, [pinDigits]);
+
+  useEffect(() => {
+    setConfirmPin(pinArrayToString(confirmPinDigits));
+  }, [confirmPinDigits]);
+
+  useEffect(() => {
+    setLoginPin(pinArrayToString(loginPinDigits));
+  }, [loginPinDigits]);
   const [dualSearchQuery, setDualSearchQuery] = useState('');
   const [dualSelectedIds, setDualSelectedIds] = useState<Set<string>>(new Set());
   const [showIbImport, setShowIbImport] = useState(false);
@@ -550,8 +572,6 @@ function App() {
       setAuthError('Enter a valid username.');
       return;
     }
-    const pin = pinArrayToString(pinDigits);
-    const confirmPin = pinArrayToString(confirmPinDigits);
     if (!isValidPin(pin) || !isValidPin(confirmPin)) {
       setAuthError('PIN must be exactly 4 digits.');
       return;
@@ -591,7 +611,7 @@ function App() {
       setAuthError('Username not found');
       return;
     }
-    const pin = pinArrayToString(loginPinDigits);
+    const pin = loginPin;
     if (!isValidPin(pin)) {
       setAuthError('PIN must be exactly 4 digits.');
       return;
@@ -669,6 +689,30 @@ function App() {
     return total;
   }, [satActData.psat, satActData.psatMath, satActData.psatEnglish]);
 
+  const activeBaselineScore = useMemo(() => {
+    if (activeSatScore !== null) return activeSatScore;
+    if (activePsatScore !== null) return satEquivalentFromPsat(activePsatScore);
+    return null;
+  }, [activeSatScore, activePsatScore]);
+
+  const baselineSource = useMemo(() => {
+    if (activeSatScore !== null) return 'SAT score';
+    if (activePsatScore !== null) return 'PSAT equivalent';
+    return null;
+  }, [activeSatScore, activePsatScore]);
+
+  const studyGainMultiplier = useMemo(() => {
+    let multiplier = 1;
+    if (studyHours === 'less than 1 hour') multiplier = 0.9;
+    else if (studyHours === '1 to 3 hours') multiplier = 1;
+    else if (studyHours === '4 to 6 hours') multiplier = 1.08;
+    else if (studyHours === '7 to 10 hours') multiplier = 1.16;
+    else if (studyHours === '10+ hours') multiplier = 1.22;
+    if (studyWeeks >= 16) multiplier += 0.08;
+    else if (studyWeeks >= 8) multiplier += 0.04;
+    return multiplier;
+  }, [studyHours, studyWeeks]);
+
   const filteredCourses = useMemo(() => {
     const query = searchQuery.toLowerCase();
     if (!query) return ibCourseOptions;
@@ -694,7 +738,14 @@ function App() {
     };
   }, [ibAverage]);
 
-  const predictedSat = useMemo(() => computePrediction(activeSatScore, 'sat'), [activeSatScore]);
+  const predictedSat = useMemo(() => {
+    if (activeBaselineScore === null) return { conservative: 0, best: 0 };
+    const basePrediction = computePrediction(activeBaselineScore, 'sat');
+    if (activeSatScore !== null && activePsatScore !== null) {
+      return refineSatPredictionWithPsat(basePrediction, activeSatScore, activePsatScore);
+    }
+    return basePrediction;
+  }, [activeBaselineScore, activeSatScore, activePsatScore]);
   const predictedAct = useMemo(() => computePrediction(satActData.act, 'act'), [satActData.act]);
   const predictedPsa = useMemo(() => computePrediction(activePsatScore, 'psat'), [activePsatScore]);
 
@@ -707,14 +758,14 @@ function App() {
   }, [satActData.satHistory]);
 
   const strongSatProgression = useMemo(() => {
-    if (activeSatScore === null) return [];
-    return simulateSatProgression(activeSatScore, satHorizonWeeks / 2, STRONG_GAIN + satTrendBoost, SAT_CAP);
-  }, [activeSatScore, satHorizonWeeks, satTrendBoost]);
+    if (activeBaselineScore === null) return [];
+    return simulateSatProgression(activeBaselineScore, satHorizonWeeks / 2, (STRONG_GAIN * studyGainMultiplier) + satTrendBoost, SAT_CAP);
+  }, [activeBaselineScore, satHorizonWeeks, satTrendBoost, studyGainMultiplier]);
 
   const conservativeSatProgression = useMemo(() => {
-    if (activeSatScore === null) return [];
-    return simulateSatProgression(activeSatScore, satHorizonWeeks / 2, CONSERVATIVE_GAIN + Math.max(0, satTrendBoost - 2), SAT_CAP);
-  }, [activeSatScore, satHorizonWeeks, satTrendBoost]);
+    if (activeBaselineScore === null) return [];
+    return simulateSatProgression(activeBaselineScore, satHorizonWeeks / 2, (CONSERVATIVE_GAIN * studyGainMultiplier) + Math.max(0, satTrendBoost - 2), SAT_CAP);
+  }, [activeBaselineScore, satHorizonWeeks, satTrendBoost, studyGainMultiplier]);
 
   const centerOptions: TestCenter[] = useMemo(() => {
     return testCentersBase.map((center) => {
@@ -1229,7 +1280,8 @@ function App() {
             <div className="card">
               <h2>DUAL</h2>
               <p className="subtle">Compete in 1v1 IB-style matchups and grow your win streak, bread, and Elo score.</p>
-              <button type="button" onClick={() => setSection('dual')}>Enter DUAL</button>
+              <p className="subtle" style={{ color: '#888', fontStyle: 'italic' }}>Temporarily disabled for core product stabilization.</p>
+              {/* <button type="button" onClick={() => setSection('dual')}>Enter DUAL</button> */}
             </div>
           </div>
 
@@ -1530,7 +1582,7 @@ function App() {
                   </button>
                 </div>
                 <div className="info-box" style={{ marginTop: '1rem' }}>
-                  <p>PSAT is optional and separate from the SAT attempts above. The SAT forecast works fully without it.</p>
+                  <p>PSAT is optional but now helps create a SAT baseline when SAT scores are missing. If both SAT and PSAT are entered, SAT remains primary and PSAT refines the projected range.</p>
                 </div>
               </div>
             )}
@@ -1539,12 +1591,21 @@ function App() {
             <h2>SAT forecast</h2>
             <div className="bar-graph">
               <div className="bar-row">
-                <span>Your score</span>
+                <span>Baseline</span>
                 <div>
-                  <div className="bar-track"><div className="bar-fill user" style={{ width: styleWidth(activeSatScore ?? 0, 1600) }} /></div>
-                  <div className="bar-label">{activeSatScore ?? '-'} / 1600</div>
+                  <div className="bar-track"><div className="bar-fill user" style={{ width: styleWidth(activeBaselineScore ?? 0, 1600) }} /></div>
+                  <div className="bar-label">{activeBaselineScore ?? '-'} / 1600</div>
                 </div>
               </div>
+              {baselineSource && (
+                <div className="bar-row">
+                  <span>Baseline source</span>
+                  <div>
+                    <div className="bar-track"><div className="bar-fill" style={{ width: '100%', background: 'rgba(209,213,219,0.35)' }} /></div>
+                    <div className="bar-label">{baselineSource}</div>
+                  </div>
+                </div>
+              )}
               <div className="bar-row">
                 <span>Conservative</span>
                 <div>
@@ -1619,12 +1680,68 @@ function App() {
             <div className="info-box" style={{ marginTop: '1rem' }}>
               <p>
                 Based on {studyWeeks > 0 ? `${studyWeeks} weeks` : 'no prior'} study experience and {studyHours.toLowerCase()} of weekly practice,
-                here's your projected SAT score growth over the next 8 weeks.
+                here's your projected SAT score growth trajectory.
               </p>
               <p>The optimistic scenario assumes consistent effort and good study habits. The conservative scenario accounts for typical challenges and plateaus.</p>
             </div>
-            {activeSatScore === null ? (
-              <p className="subtle" style={{ marginTop: '1rem' }}>Select an active SAT attempt or enter a total score to see progression projections.</p>
+            <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+              <table style={{ width: '100%', minWidth: '620px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                    <th style={{ padding: '0.75rem 0.5rem' }}>Timeline</th>
+                    <th style={{ padding: '0.75rem 0.5rem' }}>Total Hours</th>
+                    <th style={{ padding: '0.75rem 0.5rem' }}>Daily Intensity</th>
+                    <th style={{ padding: '0.75rem 0.5rem' }}>UNIS Student Profile</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>0 Weeks</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>0</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>0 hrs</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>The Baseline: Seeing where your IB classes naturally put you (usually 1200+)</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>2 Weeks</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>~14</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>&lt; 1 hr</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>The Light Refresher: Just a few practice sets to learn the digital interface</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>4 Weeks</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>~25</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>~1 hr</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>The Quick Fix: Brushing up on a few specific math rules or grammar tips</td>
+                  </tr>
+                  <tr style={{ background: 'rgba(198,255,211,0.8)' }}>
+                    <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700 }}>6 Weeks</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>~40</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>1–3 hrs</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>The Realistic Sprint: Moderate daily work to bridge a 50–70 point gap</td>
+                  </tr>
+                  <tr style={{ background: 'rgba(220,247,233,0.65)' }}>
+                    <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700 }}>8 Weeks</td>
+                    <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700 }}>~60</td>
+                    <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700 }}>1–3 hrs</td>
+                    <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700 }}>The Balanced Path: The "sweet spot" for most UNIS juniors to hit the 1370</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>12 Weeks</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>~85</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>1–3 hrs</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>The Steady Climber: Long-term mastery without burning out on IB work</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>16 Weeks</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>~110</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>1–3 hrs</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>The Elite Goal: For students aiming for 1500+ (well above the school average)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {activeBaselineScore === null ? (
+              <p className="subtle" style={{ marginTop: '1rem' }}>Select an SAT score or enter PSAT input to see progression projections.</p>
             ) : (
               <div className="progression-chart">
                 <div className="progression-row header" style={{ fontWeight: 700 }}>
@@ -1634,8 +1751,8 @@ function App() {
                 </div>
                 {Array.from({ length: 5 }, (_, idx) => {
                   const label = idx === 0 ? 'Start' : `${idx * 2} weeks`;
-                  const strongScore = strongSatProgression[idx] ?? strongSatProgression[strongSatProgression.length - 1] ?? activeSatScore;
-                  const conservativeScore = conservativeSatProgression[idx] ?? conservativeSatProgression[conservativeSatProgression.length - 1] ?? activeSatScore;
+                  const strongScore = strongSatProgression[idx] ?? strongSatProgression[strongSatProgression.length - 1] ?? activeBaselineScore;
+                  const conservativeScore = conservativeSatProgression[idx] ?? conservativeSatProgression[conservativeSatProgression.length - 1] ?? activeBaselineScore;
                   return (
                     <div key={idx} className="progression-row">
                       <span>{label}</span>
@@ -1652,8 +1769,8 @@ function App() {
                 })}
                 <div className="label-row" style={{ marginTop: '1rem' }}>
                   <span />
-                  <span>Optimistic: {strongSatProgression[strongSatProgression.length - 1] ?? activeSatScore} (+{((strongSatProgression[strongSatProgression.length - 1] ?? activeSatScore) - (activeSatScore ?? 0))})</span>
-                  <span>Conservative: {conservativeSatProgression[conservativeSatProgression.length - 1] ?? activeSatScore} (+{((conservativeSatProgression[conservativeSatProgression.length - 1] ?? activeSatScore) - (activeSatScore ?? 0))})</span>
+                  <span>Optimistic: {strongSatProgression[strongSatProgression.length - 1] ?? activeBaselineScore} (+{((strongSatProgression[strongSatProgression.length - 1] ?? activeBaselineScore) - (activeBaselineScore ?? 0))})</span>
+                  <span>Conservative: {conservativeSatProgression[conservativeSatProgression.length - 1] ?? activeBaselineScore} (+{((conservativeSatProgression[conservativeSatProgression.length - 1] ?? activeBaselineScore) - (activeBaselineScore ?? 0))})</span>
                 </div>
               </div>
             )}
@@ -1661,27 +1778,19 @@ function App() {
 
           <div className="card" style={{ gridColumn: '1 / -1' }}>
             <h2>Find My Test Center</h2>
-            <div className="mini-row" style={{ marginTop: '1rem' }}>
+            <div className="info-box" style={{ marginTop: '1rem' }}>
+              <p>This is currently under development!</p>
+            </div>
+            <div className="mini-row" style={{ marginTop: '1rem', gap: '0.75rem', flexWrap: 'wrap' }}>
               <input
                 value={testZip}
-                onChange={(event) => setTestZip(event.target.value)}
+                disabled
                 placeholder="Zip code"
+                style={{ flex: 1, background: 'rgba(229,231,235,0.5)', color: '#6b7280' }}
               />
-              <button type="button" onClick={() => saveTestZip(testZip)}>Update</button>
+              <button type="button" disabled style={{ opacity: 0.65, cursor: 'not-allowed' }}>Update</button>
             </div>
-            <p className="subtle">Test center recommendations are ranked by commute, reliability, environment, and stress.</p>
-            {centerOptions.map((center) => (
-              <div key={center.name} className="subject-item" style={{ display: 'grid', gap: '0.55rem' }}>
-                <div className="mini-row" style={{ justifyContent: 'space-between' }}>
-                  <strong>{center.name}</strong>
-                  <span>{center.label}</span>
-                </div>
-                <div className="label-row">
-                  <span>Distance {center.distance.toFixed(1)} mi</span>
-                  <span>Reliability {center.reliability}%</span>
-                </div>
-              </div>
-            ))}
+            <p className="subtle" style={{ marginTop: '0.75rem' }}>Test center recommendations are paused until this feature is ready.</p>
           </div>
         </div>
       )}
@@ -1761,7 +1870,8 @@ function App() {
         </div>
       )}
 
-      {section === 'dual' && (
+      {/* DUAL multiplayer system temporarily disabled for core product stabilization
+      {false && section === 'dual' && (
         <div className="grid-2">
           <div className="card">
             <h2>Online Now</h2>
@@ -2226,6 +2336,7 @@ function App() {
           </div>
         </div>
       )}
+      */}
 
       <div className="footer-note">
         <details>
